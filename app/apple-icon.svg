@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- 猫脸背景 -->
+  <circle cx="50" cy="55" r="40" fill="#FF9500"/>
+
+  <!-- 左耳 -->
+  <path d="M15 35 L25 55 L35 35 Z" fill="#FF9500"/>
+  <path d="M18 38 L25 50 L32 38 Z" fill="#FFB84D"/>
+
+  <!-- 右耳 -->
+  <path d="M65 35 L75 55 L85 35 Z" fill="#FF9500"/>
+  <path d="M68 38 L75 50 L82 38 Z" fill="#FFB84D"/>
+
+  <!-- 眼睛 -->
+  <ellipse cx="35" cy="55" rx="8" ry="10" fill="white"/>
+  <ellipse cx="65" cy="55" rx="8" ry="10" fill="white"/>
+  <circle cx="35" cy="55" r="5" fill="#333"/>
+  <circle cx="65" cy="55" r="5" fill="#333"/>
+  <circle cx="37" cy="53" r="2" fill="white"/>
+  <circle cx="67" cy="53" r="2" fill="white"/>
+
+  <!-- 鼻子 -->
+  <ellipse cx="50" cy="68" rx="5" ry="4" fill="#FF6B6B"/>
+
+  <!-- 嘴巴 -->
+  <path d="M50 72 Q45 80 40 75" stroke="#333" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <path d="M50 72 Q55 80 60 75" stroke="#333" stroke-width="2" fill="none" stroke-linecap="round"/>
+
+  <!-- 胡须 -->
+  <line x1="10" y1="65" x2="28" y2="68" stroke="#333" stroke-width="2" stroke-linecap="round"/>
+  <line x1="10" y1="72" x2="28" y2="72" stroke="#333" stroke-width="2" stroke-linecap="round"/>
+  <line x1="72" y1="68" x2="90" y2="65" stroke="#333" stroke-width="2" stroke-linecap="round"/>
+  <line x1="72" y1="72" x2="90" y2="72" stroke="#333" stroke-width="2" stroke-linecap="round"/>
+</svg>
