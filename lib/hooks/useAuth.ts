@@ -70,6 +70,25 @@ export async function signIn(email: string, password: string) {
   });
 
   if (error) throw error;
+
+  // SSO: 生成新的 session token 并存储
+  if (data.user) {
+    const sessionToken = crypto.randomUUID();
+
+    // 更新数据库中的 session token
+    const { error: updateError } = await supabase
+      .from('user_profiles')
+      .update({ current_session_token: sessionToken })
+      .eq('id', data.user.id);
+
+    if (updateError) {
+      console.error('Failed to update session token:', updateError);
+    }
+
+    // 将 token 存入 Cookie（7天过期）
+    document.cookie = `sb-session-token=${sessionToken}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;
+  }
+
   return data;
 }
 
@@ -98,6 +117,21 @@ export async function signUp(email: string, password: string) {
 
 export async function signOut() {
   const supabase = createClient();
+
+  // 获取当前用户
+  const { data: { user } } = await supabase.auth.getUser();
+
+  // 清除数据库中的 session token
+  if (user) {
+    await supabase
+      .from('user_profiles')
+      .update({ current_session_token: null })
+      .eq('id', user.id);
+  }
+
+  // 清除 Cookie
+  document.cookie = 'sb-session-token=; path=/; max-age=0';
+
   const { error } = await supabase.auth.signOut();
   if (error) throw error;
 }

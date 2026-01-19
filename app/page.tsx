@@ -2,11 +2,15 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { ResultComparison } from '@/components/common/ResultComparison';
+import { Header } from '@/components/layout/Header';
 import { Sparkles, Zap, Heart, TrendingUp, Check } from 'lucide-react';
 
 export default function HomePage() {
   return (
     <div className="min-h-screen">
+      {/* Header */}
+      <Header />
+
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 py-20 md:py-32">
         <div className="container mx-auto px-4">

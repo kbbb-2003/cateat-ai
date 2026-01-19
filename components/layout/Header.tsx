@@ -68,13 +68,23 @@ export function Header() {
         {/* User Menu */}
         <div className="flex items-center space-x-4">
           {!user ? (
-            <Button
-              asChild
-              size="sm"
-              className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600"
-            >
-              <Link href="/login">登录</Link>
-            </Button>
+            <>
+              <Button
+                asChild
+                size="sm"
+                variant="outline"
+                className="border-amber-500 text-amber-600 hover:bg-amber-50"
+              >
+                <Link href="/login">登录</Link>
+              </Button>
+              <Button
+                asChild
+                size="sm"
+                className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600"
+              >
+                <Link href="/register">注册</Link>
+              </Button>
+            </>
           ) : (
             <>
               {profile?.plan_type === 'free' && (

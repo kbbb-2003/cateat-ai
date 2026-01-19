@@ -19,6 +19,7 @@ import { Loader2, ChevronDown, X, Search, Sparkles, Lock, Camera, Video } from '
 import { GenerationModeIndicator } from '@/components/common/GenerationModeIndicator';
 import { UsageBadge } from '@/components/common/UsageBadge';
 import { CopyButton } from '@/components/common/CopyButton';
+import { GenerationProgress } from '@/components/common/GenerationProgress';
 
 const MAX_FOODS = 5;
 
@@ -72,6 +73,13 @@ export default function CreatePage() {
   // 结果
   const [result, setResult] = useState<any>(null);
   const [showResult, setShowResult] = useState(false);
+
+  // 进度条状态
+  const [showProgress, setShowProgress] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [progressStep, setProgressStep] = useState('');
+  const [progressStatus, setProgressStatus] = useState<'loading' | 'success' | 'error'>('loading');
+  const [progressError, setProgressError] = useState('');
 
   useEffect(() => {
     loadData();
@@ -164,7 +172,32 @@ export default function CreatePage() {
     }
 
     setLoading(true);
+    setShowProgress(true);
+    setProgress(0);
+    setProgressStatus('loading');
+    setProgressError('');
+
+    // 模拟进度增长
+    let currentProgress = 0;
+    const progressInterval = setInterval(() => {
+      currentProgress += Math.random() * 8;
+      if (currentProgress >= 85) {
+        currentProgress = 85;
+        clearInterval(progressInterval);
+      }
+      setProgress(currentProgress);
+    }, 400);
+
     try {
+      // 0-30%: 处理请求中
+      setProgressStep('处理请求中...');
+      setProgress(10);
+      await new Promise(resolve => setTimeout(resolve, 300));
+
+      // 30-70%: AI 创意生成中
+      setProgressStep('AI 创意生成中...');
+      setProgress(30);
+
       const res = await fetch('/api/generate-prompt', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -185,10 +218,34 @@ export default function CreatePage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
 
+      // 70-90%: 优化提示词
+      clearInterval(progressInterval);
+      setProgressStep('优化提示词...');
+      setProgress(70);
+      await new Promise(resolve => setTimeout(resolve, 300));
+
+      setProgress(90);
+      await new Promise(resolve => setTimeout(resolve, 200));
+
+      // 100%: 完成
+      setProgress(100);
+      setProgressStep('完成 ✓');
+      setProgressStatus('success');
+
       setResult(data.data);
       setShowResult(true);
       toast.success('生成成功！');
+
+      // 1秒后隐藏进度条
+      setTimeout(() => {
+        setShowProgress(false);
+      }, 1000);
     } catch (error: any) {
+      clearInterval(progressInterval);
+      setProgress(100);
+      setProgressStatus('error');
+      setProgressStep('生成失败');
+      setProgressError(error.message || '生成失败，请重试');
       toast.error(error.message || '生成失败');
     } finally {
       setLoading(false);
@@ -548,6 +605,16 @@ export default function CreatePage() {
       {/* 生成按钮 - 固定在底部 */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg p-3 z-10">
         <div className="max-w-2xl mx-auto">
+          {/* 进度条 */}
+          <GenerationProgress
+            isVisible={showProgress}
+            progress={progress}
+            step={progressStep}
+            status={progressStatus}
+            errorMessage={progressError}
+            onRetry={progressStatus === 'error' ? handleGenerate : undefined}
+          />
+
           <Button
             onClick={handleGenerate}
             disabled={loading || !canGenerate}

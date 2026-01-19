@@ -71,6 +71,31 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
 
+  // SSO: 验证 session token（仅对已登录用户的受保护页面）
+  if (isProtectedPage && user) {
+    const sessionToken = request.cookies.get('sb-session-token')?.value;
+
+    if (sessionToken) {
+      // 从数据库获取最新的 session token
+      const { data: profile } = await supabase
+        .from('user_profiles')
+        .select('current_session_token')
+        .eq('id', user.id)
+        .single();
+
+      // 如果 token 不匹配，说明账号已在其他设备登录
+      if (profile && profile.current_session_token !== sessionToken) {
+        // 清除当前 session
+        await supabase.auth.signOut();
+
+        // 重定向到登录页，带上 SSO 冲突错误
+        const loginUrl = new URL('/login', request.url);
+        loginUrl.searchParams.set('error', 'sso_conflict');
+        return NextResponse.redirect(loginUrl);
+      }
+    }
+  }
+
   // 管理员页面检查
   if (isAdminPage) {
     if (!user) {

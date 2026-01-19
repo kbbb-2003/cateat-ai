@@ -14,8 +14,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { PRESET_ACTIONS, SOUND_OPTIONS } from '@/lib/data/video-actions';
 import { GenerationModeIndicator } from '@/components/common/GenerationModeIndicator';
 import { UsageBadge } from '@/components/common/UsageBadge';
+import { GenerationProgress } from '@/components/common/GenerationProgress';
 import { toast } from 'sonner';
 import { buildVideoPrompt } from '@/lib/prompts/video-template';
+import { compressImage } from '@/lib/utils/image-compression';
+import { uploadImageToStorage } from '@/lib/supabase/storage';
 
 export default function CreateVideoPage() {
   const router = useRouter();
@@ -28,6 +31,8 @@ export default function CreateVideoPage() {
   // 图片上传相关
   const [uploadedImage, setUploadedImage] = useState<File | null>(null);
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
+  const [compressedBlob, setCompressedBlob] = useState<Blob | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   // Frame 描述（首帧画面）
   const [frameDescription, setFrameDescription] = useState('');
@@ -57,6 +62,13 @@ export default function CreateVideoPage() {
   const [improvementText, setImprovementText] = useState('');
   const [isImproving, setIsImproving] = useState(false);
 
+  // 进度条状态
+  const [showProgress, setShowProgress] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [progressStep, setProgressStep] = useState('');
+  const [progressStatus, setProgressStatus] = useState<'loading' | 'success' | 'error'>('loading');
+  const [progressError, setProgressError] = useState('');
+
   // 切换动作选择
   const toggleAction = (actionId: string) => {
     setSelectedActions(prev =>
@@ -69,7 +81,7 @@ export default function CreateVideoPage() {
   };
 
   // 图片上传处理
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       // 检查文件大小
@@ -77,9 +89,26 @@ export default function CreateVideoPage() {
         toast.error('图片大小不能超过 10MB');
         return;
       }
+
       setUploadedImage(file);
       const previewUrl = URL.createObjectURL(file);
       setImagePreviewUrl(previewUrl);
+
+      // 立即压缩图片
+      try {
+        toast.info('正在压缩图片...');
+        const compressed = await compressImage(file, {
+          maxWidth: 1024,
+          maxHeight: 1024,
+          quality: 0.8,
+          outputFormat: 'image/jpeg',
+        });
+        setCompressedBlob(compressed);
+        toast.success('图片压缩完成');
+      } catch (error) {
+        console.error('图片压缩失败:', error);
+        toast.error('图片压缩失败，请重试');
+      }
     }
   };
 
@@ -90,20 +119,46 @@ export default function CreateVideoPage() {
     }
     setUploadedImage(null);
     setImagePreviewUrl(null);
+    setCompressedBlob(null);
   };
 
   // 步骤 1: 分析图片（Gemini）
   const handleAnalyzeImage = async () => {
-    if (!uploadedImage) return;
+    if (!compressedBlob) {
+      toast.error('请先上传并等待图片压缩完成');
+      return;
+    }
+
+    if (!profile?.id) {
+      toast.error('请先登录');
+      return;
+    }
 
     setIsAnalyzing(true);
-    try {
-      const formData = new FormData();
-      formData.append('image', uploadedImage);
+    setIsUploading(true);
 
+    try {
+      // 步骤 1: 上传到 Supabase Storage
+      toast.info('正在上传图片...');
+      const uploadResult = await uploadImageToStorage(compressedBlob, profile.id);
+
+      if (!uploadResult.success || !uploadResult.url) {
+        toast.error(uploadResult.error || '图片上传失败');
+        setIsAnalyzing(false);
+        setIsUploading(false);
+        return;
+      }
+
+      setIsUploading(false);
+      toast.success('图片上传成功');
+
+      // 步骤 2: 调用分析接口（传 URL 而非文件）
       const response = await fetch('/api/analyze-image', {
         method: 'POST',
-        body: formData,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          imageUrl: uploadResult.url,
+        }),
       });
 
       const data = await response.json();
@@ -117,6 +172,7 @@ export default function CreateVideoPage() {
       toast.error('图片分析失败，请重试');
     } finally {
       setIsAnalyzing(false);
+      setIsUploading(false);
     }
   };
 
@@ -167,6 +223,23 @@ export default function CreateVideoPage() {
       return;
     }
 
+    // 初始化进度条
+    setShowProgress(true);
+    setProgress(0);
+    setProgressStatus('loading');
+    setProgressError('');
+
+    // 模拟进度增长
+    let currentProgress = 0;
+    const progressInterval = setInterval(() => {
+      currentProgress += Math.random() * 6;
+      if (currentProgress >= 85) {
+        currentProgress = 85;
+        clearInterval(progressInterval);
+      }
+      setProgress(Math.round(currentProgress));
+    }, 400);
+
     // 确定最终的动作描述
     let finalActionDescription = expandedAction;
 
@@ -179,6 +252,9 @@ export default function CreateVideoPage() {
           .find(a => a.id === actionId);
         return action?.label || '';
       }).filter(Boolean);
+
+      setProgressStep('AI 扩写动作中...');
+      setProgress(10);
 
       setIsExpanding(true);
       try {
@@ -195,12 +271,21 @@ export default function CreateVideoPage() {
         if (expandData.success) {
           finalActionDescription = expandData.expandedAction;
           setExpandedAction(expandData.expandedAction);
+          setProgress(35);
         } else {
+          clearInterval(progressInterval);
+          setProgressStatus('error');
+          setProgressStep('动作扩写失败');
+          setProgressError('动作扩写失败，请重试');
           toast.error('动作扩写失败');
           setIsExpanding(false);
           return;
         }
       } catch (error) {
+        clearInterval(progressInterval);
+        setProgressStatus('error');
+        setProgressStep('动作扩写失败');
+        setProgressError('动作扩写失败，请重试');
         toast.error('动作扩写失败');
         setIsExpanding(false);
         return;
@@ -209,9 +294,16 @@ export default function CreateVideoPage() {
     }
 
     if (!finalActionDescription) {
+      clearInterval(progressInterval);
+      setProgressStatus('error');
+      setProgressStep('请填写动作描述');
+      setProgressError('请填写动作描述');
       toast.error('请填写动作描述');
       return;
     }
+
+    setProgressStep('AI 生成视频提示词...');
+    setProgress(50);
 
     setIsGenerating(true);
     try {
@@ -225,17 +317,42 @@ export default function CreateVideoPage() {
         }),
       });
 
+      clearInterval(progressInterval);
+
       const data = await response.json();
       if (data.success) {
+        setProgressStep('优化输出...');
+        setProgress(90);
+
+        await new Promise(resolve => setTimeout(resolve, 300));
+
         setVideoPrompt(data.videoPrompt);
         setSoundSuggestion(data.soundSuggestion || '');
         setTips(data.tips || '');
-        setShowResultDialog(true);
+
+        setProgress(100);
+        setProgressStep('完成 ✓');
+        setProgressStatus('success');
+
+        setTimeout(() => {
+          setShowProgress(false);
+          setShowResultDialog(true);
+        }, 1000);
+
         toast.success('视频提示词生成成功');
       } else {
+        setProgress(100);
+        setProgressStatus('error');
+        setProgressStep('生成失败');
+        setProgressError(data.error || '生成失败，请重试');
         toast.error(data.error || '生成失败');
       }
     } catch (error) {
+      clearInterval(progressInterval);
+      setProgress(100);
+      setProgressStatus('error');
+      setProgressStep('生成失败');
+      setProgressError('生成失败，请重试');
       toast.error('生成失败，请重试');
     } finally {
       setIsGenerating(false);
@@ -420,10 +537,15 @@ export default function CreateVideoPage() {
               {imagePreviewUrl && (
                 <Button
                   onClick={handleAnalyzeImage}
-                  disabled={isAnalyzing}
+                  disabled={isAnalyzing || !compressedBlob}
                   className="w-full bg-blue-500 hover:bg-blue-600"
                 >
-                  {isAnalyzing ? (
+                  {isUploading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      上传中...
+                    </>
+                  ) : isAnalyzing ? (
                     <>
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                       Gemini 分析中...
@@ -680,6 +802,16 @@ export default function CreateVideoPage() {
       {/* 生成按钮 - 固定在底部 */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg p-3 z-10">
         <div className="max-w-2xl mx-auto">
+          {/* 进度条 */}
+          <GenerationProgress
+            isVisible={showProgress}
+            progress={progress}
+            step={progressStep}
+            status={progressStatus}
+            errorMessage={progressError}
+            onRetry={progressStatus === 'error' ? handleGenerateVideoPrompt : undefined}
+          />
+
           <Button
             onClick={handleGenerateVideoPrompt}
             disabled={isGenerating || isExpanding || !canGenerate}

@@ -19,21 +19,12 @@ const ANALYZE_PROMPT = `你是一个专业的AI图片提示词反推专家。请
 
 export async function POST(request: NextRequest) {
   try {
-    const formData = await request.formData();
-    const image = formData.get('image') as File;
+    const body = await request.json();
+    const { imageUrl } = body;
 
-    if (!image) {
-      return NextResponse.json({ error: '请上传图片' }, { status: 400 });
+    if (!imageUrl) {
+      return NextResponse.json({ error: '请提供图片 URL' }, { status: 400 });
     }
-
-    // 检查文件大小（最大 10MB）
-    if (image.size > 10 * 1024 * 1024) {
-      return NextResponse.json({ error: '图片大小不能超过 10MB' }, { status: 400 });
-    }
-
-    // 转换为 base64
-    const imageBuffer = await image.arrayBuffer();
-    const base64Image = Buffer.from(imageBuffer).toString('base64');
 
     // 调用 Gemini API（中转站，OpenAI 兼容格式）
     const response = await fetch(`${process.env.GEMINI_BASE_URL}/chat/completions`, {
@@ -52,7 +43,7 @@ export async function POST(request: NextRequest) {
               {
                 type: 'image_url',
                 image_url: {
-                  url: `data:${image.type};base64,${base64Image}`,
+                  url: imageUrl,
                 },
               },
             ],
