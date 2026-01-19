@@ -94,17 +94,27 @@ export async function POST(request: NextRequest) {
 
     // 如果用户已登录，保存到历史记录
     if (user) {
-      await supabase.from('prompts_history').insert({
+      // 根据用户套餐确定 generation_mode
+      const generationMode = isPremium ? 'professional' : 'basic';
+
+      const { error: insertError } = await supabase.from('prompts_history').insert({
         user_id: user.id,
         prompt_type: 'video',
-        image_prompt: videoPrompt,
-        input_data: {
+        generation_mode: generationMode,
+        image_prompt: '', // 视频类型不需要图片提示词，但字段是 NOT NULL
+        video_prompt: videoPrompt,
+        food_ids: [], // 视频类型不需要食物ID，但字段是 NOT NULL
+        input_snapshot: {
           frameDescription,
           actionDescription,
           soundOption,
           planType,
         },
       });
+
+      if (insertError) {
+        console.error('Error saving to history:', insertError);
+      }
     }
 
     return NextResponse.json({

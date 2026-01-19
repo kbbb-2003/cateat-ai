@@ -7,7 +7,6 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Video, Copy, Check, Camera, Sparkles, Loader2, X, Wand2, Pencil, RefreshCw, Lock } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -482,32 +481,48 @@ export default function CreateVideoPage() {
 
         {/* ========== 步骤 1: 首帧画面描述 ========== */}
         <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <Label className="text-sm font-medium">
-              首帧画面描述 <span className="text-red-500">*</span>
-            </Label>
-            <Select value={inputMode} onValueChange={(v) => setInputMode(v as 'manual' | 'upload')}>
-              <SelectTrigger className="w-36 h-8 text-xs">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="manual">手动输入</SelectItem>
-                <SelectItem value="upload">上传图片分析</SelectItem>
-              </SelectContent>
-            </Select>
+          <Label className="text-sm font-medium">
+            首帧画面描述 <span className="text-red-500">*</span>
+          </Label>
+
+          {/* Tab 切换按钮 */}
+          <div className="flex gap-2">
+            <button
+              onClick={() => setInputMode('manual')}
+              className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border-2 text-sm font-medium transition-all duration-200 ${
+                inputMode === 'manual'
+                  ? 'border-orange-500 bg-orange-50 text-orange-600'
+                  : 'border-gray-200 bg-white text-gray-600 hover:border-orange-300 hover:bg-orange-50/50'
+              }`}
+            >
+              <Pencil className="w-4 h-4" />
+              手动输入
+            </button>
+            <button
+              onClick={() => setInputMode('upload')}
+              className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border-2 text-sm font-medium transition-all duration-200 ${
+                inputMode === 'upload'
+                  ? 'border-orange-500 bg-orange-50 text-orange-600'
+                  : 'border-gray-200 bg-white text-gray-600 hover:border-orange-300 hover:bg-orange-50/50'
+              }`}
+            >
+              <Camera className="w-4 h-4" />
+              图片分析
+            </button>
           </div>
 
+          {/* 图片上传模式 */}
           {inputMode === 'upload' && (
             <div className="space-y-3">
               {/* 图片上传区域 */}
               {!imagePreviewUrl ? (
-                <label className="flex flex-col items-center justify-center w-full h-36 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-orange-400 hover:bg-orange-50 transition-colors">
+                <label className="flex flex-col items-center justify-center w-full h-36 border-2 border-dashed border-orange-300 rounded-lg cursor-pointer hover:border-orange-400 hover:bg-orange-50 transition-colors bg-orange-50/30">
                   <div className="flex flex-col items-center justify-center py-4">
-                    <svg className="w-8 h-8 mb-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    <p className="text-sm text-gray-500">
-                      <span className="text-orange-500 font-medium">点击上传</span> 或拖拽图片
+                    <div className="w-12 h-12 mb-3 rounded-full bg-orange-100 flex items-center justify-center">
+                      <Camera className="w-6 h-6 text-orange-500" />
+                    </div>
+                    <p className="text-sm text-gray-600">
+                      <span className="text-orange-500 font-medium">点击上传图片</span>
                     </p>
                     <p className="text-xs text-gray-400 mt-1">支持 PNG, JPG, WEBP (最大 10MB)</p>
                   </div>
@@ -551,7 +566,10 @@ export default function CreateVideoPage() {
                       Gemini 分析中...
                     </>
                   ) : (
-                    '🔍 分析图片（Gemini）'
+                    <>
+                      <Sparkles className="w-4 h-4 mr-2" />
+                      AI 分析图片
+                    </>
                   )}
                 </Button>
               )}
@@ -561,7 +579,7 @@ export default function CreateVideoPage() {
           {/* 画面描述文本框 */}
           <Textarea
             placeholder={inputMode === 'upload'
-              ? '上传图片后点击分析，AI会自动识别画面内容...'
+              ? '上传图片后点击分析，AI 会自动识别画面内容...'
               : '描述首帧画面，例如：A cute fluffy ginger cat wearing a light blue fuzzy hoodie with a pink bow, sitting at a wooden table with delicious food in front...'
             }
             value={frameDescription}

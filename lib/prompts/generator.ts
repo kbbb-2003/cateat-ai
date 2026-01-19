@@ -433,6 +433,7 @@ async function saveToHistory(data: {
   sceneId: string | null;
   templateId: string | null;
   mode: 'basic' | 'professional';
+  promptType: 'image' | 'video';
   imagePrompt: string;
   videoPrompt: string;
   explanation: string;
@@ -454,6 +455,7 @@ async function saveToHistory(data: {
         scene_id: data.sceneId,
         template_id: data.templateId,
         generation_mode: data.mode,
+        prompt_type: data.promptType,
         image_prompt: data.imagePrompt,
         video_prompt: data.videoPrompt,
         explanation: data.explanation,
@@ -569,6 +571,7 @@ export async function generatePrompt(
       sceneId: scene?.id || null,
       templateId: template?.id || null,
       mode,
+      promptType: generateType === 'video' ? 'video' : 'image',
       ...result,
       inputSnapshot: {
         cat: { name: cat.name, breed: cat.breed },
