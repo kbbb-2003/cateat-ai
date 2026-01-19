@@ -33,10 +33,14 @@ export default function LoginPage() {
     try {
       await signIn(email, password);
       toast.success('登录成功');
-      router.push('/create');
+
+      // 等待一小段时间确保 Cookie 写入完成
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      // 使用 window.location.href 强制刷新页面，确保 middleware 能读取到新的 Cookie
+      window.location.href = '/create';
     } catch (error: any) {
       toast.error(error.message || '登录失败');
-    } finally {
       setLoading(false);
     }
   };

@@ -17,18 +17,30 @@ export async function middleware(request: NextRequest) {
           return request.cookies.get(name)?.value;
         },
         set(name: string, value: string, options: any) {
-          request.cookies.set({ name, value, ...options });
-          response = NextResponse.next({
-            request: { headers: request.headers },
+          // 设置 Cookie 到 request 和 response
+          request.cookies.set({
+            name,
+            value,
+            ...options,
           });
-          response.cookies.set({ name, value, ...options });
+          response.cookies.set({
+            name,
+            value,
+            ...options,
+          });
         },
         remove(name: string, options: any) {
-          request.cookies.set({ name, value: '', ...options });
-          response = NextResponse.next({
-            request: { headers: request.headers },
+          // 从 request 和 response 中移除 Cookie
+          request.cookies.set({
+            name,
+            value: '',
+            ...options,
           });
-          response.cookies.set({ name, value: '', ...options });
+          response.cookies.set({
+            name,
+            value: '',
+            ...options,
+          });
         },
       },
     }
@@ -49,14 +61,17 @@ export async function middleware(request: NextRequest) {
 
   const isAdminPage = request.nextUrl.pathname.startsWith('/admin');
 
+  // 已登录用户访问登录页，重定向到创建页
   if (isAuthPage && user) {
     return NextResponse.redirect(new URL('/create', request.url));
   }
 
+  // 未登录用户访问受保护页面，重定向到登录页
   if (isProtectedPage && !user) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
 
+  // 管理员页面检查
   if (isAdminPage) {
     if (!user) {
       return NextResponse.redirect(new URL('/login', request.url));
