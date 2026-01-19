@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { Video, Copy, Check, Camera, Sparkles, Loader2, X, Wand2, Pencil, RefreshCw } from 'lucide-react';
+import { Video, Copy, Check, Camera, Sparkles, Loader2, X, Wand2, Pencil, RefreshCw, Lock } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { PRESET_ACTIONS, SOUND_OPTIONS } from '@/lib/data/video-actions';
 import { GenerationModeIndicator } from '@/components/common/GenerationModeIndicator';
@@ -320,8 +320,13 @@ export default function CreateVideoPage() {
   };
 
   // 判断是否可以生成
+  const usageLimit = profile?.plan_type === 'vip' ? Infinity : profile?.plan_type === 'pro' ? 5 : 3;
+  const remainingUsage = usageLimit === Infinity ? Infinity : usageLimit - (profile?.daily_usage || 0);
+  const hasUsageLeft = remainingUsage > 0;
+
   const canGenerate = frameDescription.trim().length > 0 &&
-    (selectedActions.length > 0 || customAction.trim() || expandedAction);
+    (selectedActions.length > 0 || customAction.trim() || expandedAction) &&
+    hasUsageLeft;
 
   return (
     <div className="max-w-2xl mx-auto p-4 pb-24">
@@ -330,8 +335,8 @@ export default function CreateVideoPage() {
         <GenerationModeIndicator mode={isPremium ? 'professional' : 'basic'} />
         <UsageBadge
           used={profile?.daily_usage || 0}
-          limit={profile?.plan_type === 'vip' ? Infinity : profile?.plan_type === 'pro' ? Infinity : Infinity}
-          isUnlimited={profile?.plan_type === 'vip' || profile?.plan_type === 'pro' || profile?.plan_type === 'free'}
+          limit={profile?.plan_type === 'vip' ? Infinity : profile?.plan_type === 'pro' ? 5 : 3}
+          isUnlimited={profile?.plan_type === 'vip'}
           planType={profile?.plan_type || 'free'}
         />
       </div>
@@ -678,7 +683,7 @@ export default function CreateVideoPage() {
           <Button
             onClick={handleGenerateVideoPrompt}
             disabled={isGenerating || isExpanding || !canGenerate}
-            className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 h-12 text-base font-medium"
+            className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 h-12 text-base font-medium disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isExpanding ? (
               <>
@@ -690,6 +695,11 @@ export default function CreateVideoPage() {
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                 生成中...
               </>
+            ) : !hasUsageLeft ? (
+              <>
+                <Lock className="w-4 h-4 mr-2" />
+                今日次数已用完
+              </>
             ) : (
               <>
                 <Sparkles className="w-4 h-4 mr-2" />
@@ -698,8 +708,16 @@ export default function CreateVideoPage() {
             )}
           </Button>
           <p className="text-xs text-center text-gray-500 mt-1.5">
-            {profile?.plan_type === 'free' && '无限次数'}
-            {profile?.plan_type === 'pro' && `今日剩余 ${10 - (profile.daily_usage || 0)} 次`}
+            {profile?.plan_type === 'free' && (
+              remainingUsage > 0
+                ? `今日剩余 ${remainingUsage}/3 次`
+                : '今日次数已用完，升级解锁更多次数'
+            )}
+            {profile?.plan_type === 'pro' && (
+              remainingUsage > 0
+                ? `今日剩余 ${remainingUsage}/5 次`
+                : '今日次数已用完，明天再来吧'
+            )}
             {profile?.plan_type === 'vip' && '无限次数'}
             {!profile && '无限次数'}
           </p>

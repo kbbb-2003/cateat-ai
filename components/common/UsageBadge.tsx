@@ -20,13 +20,16 @@ export function UsageBadge({ used, limit, isUnlimited, planType }: UsageBadgePro
 
   const remaining = limit - used;
   const isLow = remaining <= 1;
+  const isExhausted = remaining <= 0;
 
   return (
     <Badge
       variant="outline"
       className={`${
-        isLow
-          ? 'border-red-500 text-red-700'
+        isExhausted
+          ? 'border-red-500 text-red-700 bg-red-50'
+          : isLow
+          ? 'border-orange-500 text-orange-700'
           : planType === 'free'
           ? 'border-gray-400 text-gray-700'
           : 'border-amber-500 text-amber-700'

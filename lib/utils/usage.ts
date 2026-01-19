@@ -5,9 +5,9 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 // 用量限制配置
 const USAGE_LIMITS = {
-  free: Infinity, // 测试阶段：无限次数
-  pro: Infinity, // 测试阶段：无限次数
-  vip: Infinity,
+  free: 3,        // 基础用户：每天 3 次
+  pro: 5,         // Pro 用户：每天 5 次
+  vip: Infinity,  // VIP 用户：无限
 };
 
 // 判断是否跨天（UTC+8）
