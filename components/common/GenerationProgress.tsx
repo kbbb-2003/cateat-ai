@@ -92,7 +92,7 @@ export function GenerationProgress({
                 : 'text-orange-700'
             }`}
           >
-            {progressPercentage}%
+            {progressPercentage.toFixed(1)}%
           </span>
         </div>
 
