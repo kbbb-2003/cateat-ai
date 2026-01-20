@@ -445,19 +445,32 @@ export default function CreateVideoPage() {
     hasUsageLeft;
 
   return (
-    <div className="max-w-2xl mx-auto p-4 pb-24">
-      {/* 顶部状态 */}
-      <div className="flex items-center justify-between mb-4">
-        <GenerationModeIndicator mode={isPremium ? 'professional' : 'basic'} />
-        <UsageBadge
-          used={profile?.daily_usage || 0}
-          limit={profile?.plan_type === 'vip' ? Infinity : profile?.plan_type === 'pro' ? 5 : 3}
-          isUnlimited={profile?.plan_type === 'vip'}
-          planType={profile?.plan_type || 'free'}
-        />
+    <div className="page-gradient-bg">
+      {/* 装饰性猫爪 */}
+      <div className="paw-decoration top-right hidden md:block">
+        <svg width="80" height="80" viewBox="0 0 100 100" fill="currentColor" className="text-orange-500">
+          <ellipse cx="50" cy="65" rx="30" ry="25"/>
+          <circle cx="25" cy="35" r="12"/>
+          <circle cx="50" cy="25" r="12"/>
+          <circle cx="75" cy="35" r="12"/>
+          <circle cx="35" cy="50" r="10"/>
+          <circle cx="65" cy="50" r="10"/>
+        </svg>
       </div>
 
-      <Card className="p-4 space-y-5">
+      <div className="max-w-2xl mx-auto p-4 pb-20 relative z-10">
+        {/* 顶部状态 */}
+        <div className="flex items-center justify-between mb-4">
+          <GenerationModeIndicator mode={isPremium ? 'professional' : 'basic'} />
+          <UsageBadge
+            used={profile?.daily_usage || 0}
+            limit={profile?.plan_type === 'vip' ? Infinity : profile?.plan_type === 'pro' ? 5 : 3}
+            isUnlimited={profile?.plan_type === 'vip'}
+            planType={profile?.plan_type || 'free'}
+          />
+        </div>
+
+        <Card className="card-enhanced p-5 space-y-5 rounded-xl">
         {/* 生成类型选择 */}
         <div className="space-y-2">
           <label className="text-sm font-medium text-gray-700">生成类型</label>
@@ -481,9 +494,9 @@ export default function CreateVideoPage() {
 
         {/* ========== 步骤 1: 首帧画面描述 ========== */}
         <div className="space-y-3">
-          <Label className="text-sm font-medium">
-            首帧画面描述 <span className="text-red-500">*</span>
-          </Label>
+          <label className="section-title text-sm">
+            <span>🎬</span> 首帧画面描述 <span className="text-red-500 ml-1">*</span>
+          </label>
 
           {/* Tab 切换按钮 */}
           <div className="flex gap-2">
@@ -584,7 +597,7 @@ export default function CreateVideoPage() {
             }
             value={frameDescription}
             onChange={(e) => setFrameDescription(e.target.value)}
-            className="min-h-[100px] resize-none"
+            className="min-h-[100px] resize-none input-enhanced transition-all duration-200"
           />
           {frameDescription && inputMode === 'upload' && (
             <p className="text-xs text-green-600">✅ 图片分析完成，可以手动编辑修改</p>
@@ -593,13 +606,13 @@ export default function CreateVideoPage() {
 
         {/* ========== 步骤 2: 动作描述 ========== */}
         <div className="space-y-3">
-          <Label className="text-sm font-medium">
-            动作类型 <span className="text-gray-400 font-normal">（可多选）</span>
-          </Label>
+          <label className="section-title text-sm">
+            <span>🎭</span> 动作类型 <span className="text-gray-400 text-xs ml-1 font-normal">（可多选）</span>
+          </label>
 
           {/* 已选动作显示 */}
           {selectedActions.length > 0 && (
-            <div className="flex flex-wrap gap-2 p-3 bg-orange-50 rounded-lg border border-orange-100">
+            <div className="flex flex-wrap gap-1.5 p-3 bg-orange-50 rounded-lg border border-orange-100">
               {selectedActions.map(actionId => {
                 const action = PRESET_ACTIONS
                   .flatMap(c => c.actions)
@@ -607,12 +620,13 @@ export default function CreateVideoPage() {
                 return (
                   <span
                     key={actionId}
-                    className="inline-flex items-center gap-1 px-3 py-1 bg-orange-500 text-white text-sm rounded-full"
+                    className="inline-flex items-center gap-1 px-3 py-1 bg-orange-500 text-white text-sm rounded-full tag-badge"
                   >
                     {action?.label}
                     <button
                       onClick={() => toggleAction(actionId)}
-                      className="hover:bg-orange-600 rounded-full p-0.5"
+                      className="hover:bg-orange-600 rounded-full p-0.5 transition-colors"
+                      aria-label="删除"
                     >
                       <X className="w-3 h-3" />
                     </button>
@@ -654,7 +668,7 @@ export default function CreateVideoPage() {
               setCustomAction(e.target.value);
               setExpandedAction(''); // 清除之前的扩写结果
             }}
-            className="min-h-[70px] resize-none"
+            className="min-h-[70px] resize-none input-enhanced transition-all duration-200"
           />
 
           {/* 扩写按钮 */}
@@ -688,9 +702,9 @@ export default function CreateVideoPage() {
 
         {/* ========== 步骤 3: 音效推荐 ========== */}
         <div className="space-y-3">
-          <Label className="text-sm font-medium">
-            音效推荐 <span className="text-gray-400 font-normal">（可选）</span>
-          </Label>
+          <label className="section-title text-sm">
+            <span>🎵</span> 音效推荐 <span className="text-gray-400 text-xs ml-1 font-normal">（可选）</span>
+          </label>
 
           <div className="grid grid-cols-2 gap-2">
             {SOUND_OPTIONS.map(option => {
@@ -764,7 +778,7 @@ export default function CreateVideoPage() {
           <div className="space-y-3 pt-4 border-t">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Label className="text-sm font-medium text-gray-700">📹 视频提示词</Label>
+                <label className="section-title text-sm">📹 视频提示词</label>
                 {isPremium ? (
                   <span className="px-2 py-0.5 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs rounded-full">
                     专业版
@@ -816,9 +830,10 @@ export default function CreateVideoPage() {
           </div>
         )}
       </Card>
+      </div>
 
       {/* 生成按钮 - 固定在底部 */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg p-3 z-10">
+      <div className="fixed bottom-0 left-0 right-0 bottom-bar shadow-lg p-3 z-10">
         <div className="max-w-2xl mx-auto">
           {/* 进度条 */}
           <GenerationProgress
@@ -833,7 +848,7 @@ export default function CreateVideoPage() {
           <Button
             onClick={handleGenerateVideoPrompt}
             disabled={isGenerating || isExpanding || !canGenerate}
-            className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 h-12 text-base font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full btn-generate h-12 text-base font-medium disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl"
           >
             {isExpanding ? (
               <>
@@ -852,25 +867,26 @@ export default function CreateVideoPage() {
               </>
             ) : (
               <>
-                <Sparkles className="w-4 h-4 mr-2" />
+                <Sparkles className="w-4 h-4 mr-2 sparkle" />
                 生成视频提示词
               </>
             )}
           </Button>
-          <p className="text-xs text-center text-gray-500 mt-1.5">
-            {profile?.plan_type === 'free' && (
-              remainingUsage > 0
-                ? `今日剩余 ${remainingUsage}/3 次`
-                : '今日次数已用完，升级解锁更多次数'
-            )}
-            {profile?.plan_type === 'pro' && (
-              remainingUsage > 0
-                ? `今日剩余 ${remainingUsage}/5 次`
-                : '今日次数已用完，明天再来吧'
-            )}
-            {profile?.plan_type === 'vip' && '无限次数'}
-            {!profile && '无限次数'}
-          </p>
+          {profile && (
+            <p className="text-xs text-center text-gray-500 mt-1.5">
+              {profile.plan_type === 'free' && (
+                remainingUsage > 0
+                  ? `今日剩余 ${remainingUsage}/3 次`
+                  : '今日次数已用完，升级解锁更多次数'
+              )}
+              {profile.plan_type === 'pro' && (
+                remainingUsage > 0
+                  ? `今日剩余 ${remainingUsage}/5 次`
+                  : '今日次数已用完，明天再来吧'
+              )}
+              {profile.plan_type === 'vip' && '无限次数'}
+            </p>
+          )}
         </div>
       </div>
 

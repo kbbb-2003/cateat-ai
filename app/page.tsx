@@ -29,7 +29,7 @@ export default function HomePage() {
               </span>
             </h1>
             <p className="text-lg md:text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-              选择猫咪、食物、风格，自动生成 Nanabanana 图片提示词和 Veo
+              选择猫咪、食物、风格，自动生成 Nanobanana 图片提示词和 Veo
               视频提示词。专业模板加持，让你的猫猫吃播视频更容易爆款。
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">

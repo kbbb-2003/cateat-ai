@@ -123,3 +123,251 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* ========== 猫猫吃播 UI 优化样式 ========== */
+
+/* 页面背景渐变 */
+.page-gradient-bg {
+  background: linear-gradient(180deg, #FFF8F0 0%, #FFFBF7 50%, #FFFFFF 100%);
+  min-height: 100vh;
+  position: relative;
+}
+
+/* 背景装饰图案 */
+.page-gradient-bg::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 300px;
+  background:
+    radial-gradient(circle at 20% 50%, rgba(255, 149, 0, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 80% 30%, rgba(255, 107, 53, 0.06) 0%, transparent 40%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* 优化卡片样式 */
+.card-enhanced {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 149, 0, 0.1);
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.03),
+    0 4px 8px rgba(0, 0, 0, 0.03),
+    0 12px 24px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s ease;
+}
+
+.card-enhanced:hover {
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.04),
+    0 8px 16px rgba(0, 0, 0, 0.04),
+    0 16px 32px rgba(0, 0, 0, 0.06);
+  transform: translateY(-2px);
+}
+
+/* 输入框聚焦效果 */
+.input-enhanced:focus,
+.input-enhanced:focus-within {
+  border-color: #FF9500 !important;
+  box-shadow: 0 0 0 3px rgba(255, 149, 0, 0.15) !important;
+  outline: none;
+}
+
+/* 分类标题样式 */
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.section-title::before {
+  content: '';
+  width: 3px;
+  height: 1em;
+  background: linear-gradient(180deg, #FF9500 0%, #FF6B35 100%);
+  border-radius: 2px;
+}
+
+/* 生成按钮光泽效果 */
+.btn-generate {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #FF9500 0%, #FF6B35 100%);
+  transition: all 0.3s ease;
+}
+
+.btn-generate::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.3) 50%,
+    transparent 100%
+  );
+  animation: shimmer 3s infinite;
+}
+
+.btn-generate:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 107, 53, 0.4);
+}
+
+.btn-generate:active {
+  transform: translateY(0);
+}
+
+@keyframes shimmer {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+/* 标签删除动画 */
+.tag-badge {
+  transition: all 0.2s ease;
+}
+
+.tag-badge:hover {
+  transform: scale(1.02);
+}
+
+/* 折叠面板动画 */
+.collapsible-content {
+  overflow: hidden;
+  transition: height 0.3s ease-out;
+}
+
+/* 装饰性猫爪图案 */
+.paw-decoration {
+  position: fixed;
+  opacity: 0.04;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.paw-decoration.top-right {
+  top: 100px;
+  right: 20px;
+  transform: rotate(15deg);
+}
+
+.paw-decoration.bottom-left {
+  bottom: 150px;
+  left: 20px;
+  transform: rotate(-20deg);
+}
+
+/* 呼吸动画 - 用于专业模式标签 */
+.breathing-glow {
+  animation: breathingGlow 2s ease-in-out infinite;
+}
+
+@keyframes breathingGlow {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(255, 149, 0, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 15px rgba(255, 149, 0, 0.5), 0 0 25px rgba(255, 149, 0, 0.2);
+  }
+}
+
+/* 星星闪烁动画 */
+.sparkle {
+  animation: sparkle 1.5s ease-in-out infinite;
+}
+
+@keyframes sparkle {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.1);
+  }
+}
+
+/* 选中食物的标签样式 */
+.food-tag {
+  background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+  transition: all 0.2s ease;
+}
+
+.food-tag:hover {
+  background: linear-gradient(135deg, #D97706 0%, #B45309 100%);
+  transform: translateY(-1px);
+}
+
+/* 自定义食物标签 */
+.custom-food-tag {
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  transition: all 0.2s ease;
+}
+
+.custom-food-tag:hover {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  transform: translateY(-1px);
+}
+
+/* 底部固定栏优化 */
+.bottom-bar {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* 搜索框图标动画 */
+.search-icon {
+  transition: all 0.2s ease;
+}
+
+.search-input:focus + .search-icon,
+.search-input:focus-within ~ .search-icon {
+  color: #FF9500;
+  transform: scale(1.1);
+}
+
+/* 选择框优化 */
+.select-enhanced [data-radix-select-trigger] {
+  transition: all 0.2s ease;
+}
+
+.select-enhanced [data-radix-select-trigger]:focus {
+  border-color: #FF9500;
+  box-shadow: 0 0 0 3px rgba(255, 149, 0, 0.15);
+}
+
+/* 复选框选中动画 */
+.checkbox-enhanced [data-state="checked"] {
+  background: linear-gradient(135deg, #FF9500 0%, #FF6B35 100%);
+  border-color: #FF9500;
+}
+
+/* 进度条优化 */
+.progress-bar-enhanced {
+  background: linear-gradient(90deg, #FF9500 0%, #FF6B35 50%, #FF9500 100%);
+  background-size: 200% 100%;
+  animation: progressShimmer 2s linear infinite;
+}
+
+@keyframes progressShimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}

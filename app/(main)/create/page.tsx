@@ -267,19 +267,32 @@ export default function CreatePage() {
   const canGenerate = selectedStyle && (selectedCat || customCatDescription.trim()) && (selectedFoods.length > 0 || customFoods.length > 0) && hasUsageLeft;
 
   return (
-    <div className="max-w-2xl mx-auto p-4 pb-20">
-      {/* 顶部状态 */}
-      <div className="flex items-center justify-between mb-4">
-        <GenerationModeIndicator mode={isPremium ? 'professional' : 'basic'} />
-        <UsageBadge
-          used={profile?.daily_usage || 0}
-          limit={profile?.plan_type === 'vip' ? Infinity : profile?.plan_type === 'pro' ? 5 : 3}
-          isUnlimited={profile?.plan_type === 'vip'}
-          planType={profile?.plan_type || 'free'}
-        />
+    <div className="page-gradient-bg">
+      {/* 装饰性猫爪 */}
+      <div className="paw-decoration top-right hidden md:block">
+        <svg width="80" height="80" viewBox="0 0 100 100" fill="currentColor" className="text-orange-500">
+          <ellipse cx="50" cy="65" rx="30" ry="25"/>
+          <circle cx="25" cy="35" r="12"/>
+          <circle cx="50" cy="25" r="12"/>
+          <circle cx="75" cy="35" r="12"/>
+          <circle cx="35" cy="50" r="10"/>
+          <circle cx="65" cy="50" r="10"/>
+        </svg>
       </div>
 
-      <Card className="p-4 space-y-4">
+      <div className="max-w-2xl mx-auto p-4 pb-20 relative z-10">
+        {/* 顶部状态 */}
+        <div className="flex items-center justify-between mb-4">
+          <GenerationModeIndicator mode={isPremium ? 'professional' : 'basic'} />
+          <UsageBadge
+            used={profile?.daily_usage || 0}
+            limit={profile?.plan_type === 'vip' ? Infinity : profile?.plan_type === 'pro' ? 5 : 3}
+            isUnlimited={profile?.plan_type === 'vip'}
+            planType={profile?.plan_type || 'free'}
+          />
+        </div>
+
+        <Card className="card-enhanced p-5 space-y-5 rounded-xl">
         {/* 生成类型选择 */}
         <div className="space-y-2">
           <label className="text-sm font-medium text-gray-700">生成类型</label>
@@ -305,11 +318,11 @@ export default function CreatePage() {
 
         {/* 猫咪选择 */}
         <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-700">
-            猫咪形象 <span className="text-red-500 ml-1">*</span>
+          <label className="section-title text-sm">
+            <span>🐱</span> 猫咪形象 <span className="text-red-500 ml-1">*</span>
           </label>
           <Select value={selectedCat || 'none'} onValueChange={(v) => setSelectedCat(v === 'none' ? null : v)}>
-            <SelectTrigger>
+            <SelectTrigger className="input-enhanced transition-all duration-200">
               <SelectValue placeholder="选择预设猫咪（可选）" />
             </SelectTrigger>
             <SelectContent>
@@ -339,17 +352,17 @@ export default function CreatePage() {
             value={customCatDescription}
             onChange={(e) => setCustomCatDescription(e.target.value)}
             rows={2}
-            className="resize-none min-h-[60px]"
+            className="resize-none min-h-[60px] input-enhanced transition-all duration-200"
           />
         </div>
 
         {/* 视觉风格 */}
         <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-700">
-            视觉风格 <span className="text-red-500 ml-1">*</span>
+          <label className="section-title text-sm">
+            <span>🎨</span> 视觉风格 <span className="text-red-500 ml-1">*</span>
           </label>
           <Select value={selectedStyle} onValueChange={setSelectedStyle}>
-            <SelectTrigger>
+            <SelectTrigger className="input-enhanced transition-all duration-200">
               <SelectValue placeholder="选择视觉风格" />
             </SelectTrigger>
             <SelectContent>
@@ -372,9 +385,9 @@ export default function CreatePage() {
 
         {/* 食物选择 */}
         <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-700">
-            选择食物 <span className="text-red-500 ml-1">*</span>
-            <span className="text-xs text-gray-400 ml-2">
+          <label className="section-title text-sm">
+            <span>🍽️</span> 选择食物 <span className="text-red-500 ml-1">*</span>
+            <span className="text-xs text-gray-400 ml-2 font-normal">
               已选 {totalFoodsCount}/{MAX_FOODS} 种
             </span>
           </label>
@@ -388,6 +401,7 @@ export default function CreatePage() {
                 onChange={(e) => setCustomFood(e.target.value)}
                 onKeyDown={handleCustomFoodKeyDown}
                 disabled={!canAddMore}
+                className="input-enhanced transition-all duration-200"
               />
               <Button
                 type="button"
@@ -408,7 +422,7 @@ export default function CreatePage() {
                 {customFoods.map(food => (
                   <Badge
                     key={food}
-                    className="bg-green-500 hover:bg-green-600 text-white flex items-center gap-1"
+                    className="custom-food-tag text-white flex items-center gap-1 tag-badge"
                   >
                     <span>{food}</span>
                     <button
@@ -428,12 +442,12 @@ export default function CreatePage() {
           {/* 预设食物搜索 */}
           <div className="text-xs text-gray-500 mb-1.5">或从预设中选择:</div>
           <div className="relative mb-2">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 search-icon transition-all duration-200" />
             <Input
               placeholder="搜索食物..."
               value={foodSearch}
               onChange={(e) => setFoodSearch(e.target.value)}
-              className="pl-9"
+              className="pl-9 input-enhanced search-input transition-all duration-200"
             />
           </div>
 
@@ -445,7 +459,7 @@ export default function CreatePage() {
                 {selectedFoodsData.map(food => (
                   <Badge
                     key={food.id}
-                    className="bg-amber-500 hover:bg-amber-600 text-white flex items-center gap-1"
+                    className="food-tag text-white flex items-center gap-1 tag-badge"
                   >
                     <span>{food.emoji} {food.name}</span>
                     <button
@@ -515,11 +529,11 @@ export default function CreatePage() {
 
         {/* 情绪/动作（可选） */}
         <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-700">
-            情绪/动作 <span className="text-gray-400 text-xs ml-1">（可选）</span>
+          <label className="section-title text-sm">
+            <span>😸</span> 情绪/动作 <span className="text-gray-400 text-xs ml-1 font-normal">（可选）</span>
           </label>
           <Select value={selectedEmotion || 'none'} onValueChange={(v) => setSelectedEmotion(v === 'none' ? null : v)}>
-            <SelectTrigger>
+            <SelectTrigger className="input-enhanced transition-all duration-200">
               <SelectValue placeholder="选择情绪" />
             </SelectTrigger>
             <SelectContent>
@@ -545,11 +559,11 @@ export default function CreatePage() {
 
         {/* 场景选择 */}
         <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-700">
-            场景与环境 <span className="text-gray-400 text-xs ml-1">（可选）</span>
+          <label className="section-title text-sm">
+            <span>🏠</span> 场景与环境 <span className="text-gray-400 text-xs ml-1 font-normal">（可选）</span>
           </label>
           <Select value={selectedScene || 'none'} onValueChange={(v) => setSelectedScene(v === 'none' ? null : v)}>
-            <SelectTrigger>
+            <SelectTrigger className="input-enhanced transition-all duration-200">
               <SelectValue placeholder="选择预设场景（可选）" />
             </SelectTrigger>
             <SelectContent>
@@ -573,27 +587,28 @@ export default function CreatePage() {
             value={customSceneDetails}
             onChange={(e) => setCustomSceneDetails(e.target.value)}
             rows={2}
-            className="resize-none min-h-[60px]"
+            className="resize-none min-h-[60px] input-enhanced transition-all duration-200"
           />
         </div>
 
         {/* 额外要求 */}
         <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-700">
-            额外要求 <span className="text-gray-400 text-xs ml-1">（可选）</span>
+          <label className="section-title text-sm">
+            <span>✨</span> 额外要求 <span className="text-gray-400 text-xs ml-1 font-normal">（可选）</span>
           </label>
           <Textarea
             placeholder="其他想要的效果，例如：浅景深、暖色调、俯拍角度、食物冒热气..."
             value={extraRequirements}
             onChange={(e) => setExtraRequirements(e.target.value)}
             rows={2}
-            className="resize-none min-h-[60px]"
+            className="resize-none min-h-[60px] input-enhanced transition-all duration-200"
           />
         </div>
 
         {/* 当前选择摘要 */}
         {canGenerate && (
-          <div className="text-xs text-gray-600 bg-gray-50 p-2.5 rounded">
+          <div className="text-xs text-gray-600 bg-gradient-to-r from-orange-50 to-amber-50 p-3 rounded-lg border border-orange-100">
+            <span className="font-medium text-orange-600">已选择：</span>
             {selectedCatData?.name || '自定义猫咪'} · {selectedStyleData?.name} ·
             {[...selectedFoodsData.map(f => f.name), ...customFoods].join('、')}
             {selectedEmotionData && ` · ${selectedEmotionData.name}`}
@@ -601,9 +616,10 @@ export default function CreatePage() {
           </div>
         )}
       </Card>
+      </div>
 
       {/* 生成按钮 - 固定在底部 */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg p-3 z-10">
+      <div className="fixed bottom-0 left-0 right-0 bottom-bar shadow-lg p-3 z-10">
         <div className="max-w-2xl mx-auto">
           {/* 进度条 */}
           <GenerationProgress
@@ -618,7 +634,7 @@ export default function CreatePage() {
           <Button
             onClick={handleGenerate}
             disabled={loading || !canGenerate}
-            className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 h-11 text-base disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full btn-generate h-12 text-base font-medium disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl"
           >
             {loading ? (
               <>
@@ -632,7 +648,7 @@ export default function CreatePage() {
               </>
             ) : (
               <>
-                <Sparkles className="w-4 h-4 mr-2" />
+                <Sparkles className="w-4 h-4 mr-2 sparkle" />
                 {generateType === 'image' ? '生成图片提示词' : '生成视频提示词'}
               </>
             )}
