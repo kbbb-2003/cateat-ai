@@ -1,11 +1,17 @@
+'use client';
+
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { ResultComparison } from '@/components/common/ResultComparison';
 import { Header } from '@/components/layout/Header';
 import { Sparkles, Zap, Heart, TrendingUp, Check } from 'lucide-react';
+import { useProfile } from '@/lib/hooks/useAuth';
 
 export default function HomePage() {
+  const { profile, loading } = useProfile();
+  const userPlan = profile?.plan_type || 'free';
+
   return (
     <div className="min-h-screen">
       {/* Header */}
@@ -157,9 +163,19 @@ export default function HomePage() {
                   <span>保存历史记录</span>
                 </li>
               </ul>
-              <Button variant="outline" className="w-full">
-                当前套餐
-              </Button>
+              {loading ? (
+                <Button variant="outline" className="w-full" disabled>
+                  加载中...
+                </Button>
+              ) : userPlan === 'free' ? (
+                <Button variant="outline" className="w-full" disabled>
+                  当前套餐
+                </Button>
+              ) : (
+                <Button variant="outline" className="w-full" disabled>
+                  免费使用
+                </Button>
+              )}
             </Card>
 
             {/* Pro Plan */}
@@ -170,8 +186,9 @@ export default function HomePage() {
                 </span>
               </div>
               <h3 className="text-xl font-bold mb-2">Pro 版</h3>
-              <div className="mb-4">
-                <span className="text-3xl font-bold">¥29</span>
+              <div className="mb-4 flex items-baseline gap-2">
+                <span className="text-lg text-gray-400 line-through">¥49.9</span>
+                <span className="text-3xl font-bold text-orange-600">¥29.9</span>
                 <span className="text-gray-600">/月</span>
               </div>
               <ul className="space-y-3 mb-6">
@@ -196,16 +213,31 @@ export default function HomePage() {
                   <span>解锁全部食物和场景</span>
                 </li>
               </ul>
-              <Button className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600">
-                立即升级
-              </Button>
+              {loading ? (
+                <Button variant="outline" className="w-full" disabled>
+                  加载中...
+                </Button>
+              ) : userPlan === 'pro' ? (
+                <Button variant="outline" className="w-full" disabled>
+                  当前套餐
+                </Button>
+              ) : userPlan === 'vip' ? (
+                <Button variant="outline" className="w-full" disabled>
+                  已包含
+                </Button>
+              ) : (
+                <Button className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600">
+                  立即升级
+                </Button>
+              )}
             </Card>
 
             {/* VIP Plan */}
             <Card className="p-6">
               <h3 className="text-xl font-bold mb-2">VIP 版</h3>
-              <div className="mb-4">
-                <span className="text-3xl font-bold">¥99</span>
+              <div className="mb-4 flex items-baseline gap-2">
+                <span className="text-lg text-gray-400 line-through">¥99.9</span>
+                <span className="text-3xl font-bold text-orange-600">¥49.9</span>
                 <span className="text-gray-600">/月</span>
               </div>
               <ul className="space-y-3 mb-6">
@@ -226,9 +258,27 @@ export default function HomePage() {
                   <span>新功能抢先体验</span>
                 </li>
               </ul>
-              <Button variant="outline" className="w-full">
-                联系我们
-              </Button>
+              {loading ? (
+                <Button variant="outline" className="w-full" disabled>
+                  加载中...
+                </Button>
+              ) : userPlan === 'vip' ? (
+                <Button variant="outline" className="w-full" disabled>
+                  当前套餐
+                </Button>
+              ) : userPlan === 'pro' ? (
+                <Button className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600">
+                  升级 VIP
+                </Button>
+              ) : userPlan === 'free' ? (
+                <Button className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600">
+                  立即升级
+                </Button>
+              ) : (
+                <Button variant="outline" className="w-full">
+                  联系我们
+                </Button>
+              )}
             </Card>
           </div>
         </div>
