@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { User } from 'lucide-react';
+import { User, Palette } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -18,6 +18,7 @@ import { toast } from 'sonner';
 const navLinks = [
   { href: '/', label: '首页' },
   { href: '/create', label: '生成器' },
+  { href: '/image-generator', label: 'AI生图' },
   { href: '/my-cats', label: '我的猫咪' },
   { href: '/history', label: '历史记录' },
 ];
@@ -54,12 +55,13 @@ export function Header() {
             <Link
               key={link.href}
               href={link.href}
-              className={`text-sm font-medium transition-colors hover:text-amber-600 ${
+              className={`text-sm font-medium transition-colors hover:text-amber-600 flex items-center gap-1.5 ${
                 pathname === link.href
                   ? 'text-amber-600'
                   : 'text-gray-600'
               }`}
             >
+              {link.icon && <link.icon className="w-4 h-4" />}
               {link.label}
             </Link>
           ))}
