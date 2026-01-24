@@ -84,8 +84,8 @@ export default function CreateVideoPage() {
     const file = e.target.files?.[0];
     if (file) {
       // 检查文件大小
-      if (file.size > 10 * 1024 * 1024) {
-        toast.error('图片大小不能超过 10MB');
+      if (file.size > 20 * 1024 * 1024) {
+        toast.error('图片大小不能超过 20MB');
         return;
       }
 
@@ -537,7 +537,7 @@ export default function CreateVideoPage() {
                     <p className="text-sm text-gray-600">
                       <span className="text-orange-500 font-medium">点击上传图片</span>
                     </p>
-                    <p className="text-xs text-gray-400 mt-1">支持 PNG, JPG, WEBP (最大 10MB)</p>
+                    <p className="text-xs text-gray-400 mt-1">支持 PNG, JPG, WEBP (最大 20MB)</p>
                   </div>
                   <input
                     type="file"
