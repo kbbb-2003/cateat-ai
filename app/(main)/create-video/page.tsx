@@ -732,12 +732,19 @@ export default function CreateVideoPage() {
                           : 'border-gray-200 hover:border-orange-300 hover:bg-orange-50'
                   }`}
                 >
-                  {/* 锁定图标（博主同款） */}
+                  {/* 锁定图标（博主同款 - 免费用户） */}
                   {isLocked && (
                     <div className="absolute -top-2 -right-2 w-6 h-6 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-full flex items-center justify-center">
                       <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
                       </svg>
+                    </div>
+                  )}
+
+                  {/* 推荐标签（博主同款 - 付费用户） */}
+                  {!isLocked && option.id === 'blogger_style' && isPremium && (
+                    <div className="absolute -top-2 -right-2 px-2 py-0.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs rounded-full font-bold shadow-sm">
+                      推荐
                     </div>
                   )}
 
