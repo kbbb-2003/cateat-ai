@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
     const base64Image = `data:${imageData.inlineData.mimeType};base64,${imageData.inlineData.data}`;
     console.log('[API] 图片数据提取成功');
 
-    const totalDuration = Date.now() - optimizeStartTime;
+    const totalDuration = Date.now() - imageStartTime;
     console.log('[API] 总耗时:', totalDuration, 'ms');
 
     return NextResponse.json({

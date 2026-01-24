@@ -55,13 +55,12 @@ export function Header() {
             <Link
               key={link.href}
               href={link.href}
-              className={`text-sm font-medium transition-colors hover:text-amber-600 flex items-center gap-1.5 ${
+              className={`text-sm font-medium transition-colors hover:text-amber-600 ${
                 pathname === link.href
                   ? 'text-amber-600'
                   : 'text-gray-600'
               }`}
             >
-              {link.icon && <link.icon className="w-4 h-4" />}
               {link.label}
             </Link>
           ))}
