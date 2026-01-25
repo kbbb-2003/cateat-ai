@@ -57,28 +57,26 @@ export async function POST(request: NextRequest) {
     const optimizedPrompt = prompt;
     const optimizeStartTime = Date.now();
 
-    // 阶段2: 使用原生 fetch 调用 Vertex AI
+    // 阶段2: 使用 Google AI Studio API 生成图片
     console.log('[API] 阶段2: 开始生成图片...');
     const imageStartTime = Date.now();
 
-    const vertexUrl = `https://us-central1-aiplatform.googleapis.com/v1/projects/gen-lang-client-0031506214/locations/us-central1/publishers/google/models/gemini-3-pro-image-preview:predict?key=${googleImageApiKey}`;
-    console.log('[API] Vertex AI URL:', vertexUrl.replace(googleImageApiKey, '***'));
+    const aiStudioUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-001:generateContent?key=${googleImageApiKey}`;
+    console.log('[API] AI Studio URL:', aiStudioUrl.replace(googleImageApiKey, '***'));
 
-    const imageResponse = await fetch(vertexUrl, {
+    const imageResponse = await fetch(aiStudioUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        instances: [
-          {
-            prompt: optimizedPrompt
-          }
-        ],
-        parameters: {
-          sampleCount: 1,
-          aspectRatio: aspectRatio || "1:1",
-          imageSize: resolution || "1K",
+        contents: [{
+          parts: [{
+            text: optimizedPrompt
+          }]
+        }],
+        generationConfig: {
+          responseModalities: ["IMAGE"]
         }
       })
     });
@@ -98,8 +96,9 @@ export async function POST(request: NextRequest) {
     const imageDuration = Date.now() - imageStartTime;
     console.log('[API] 图片生成完成，耗时:', imageDuration, 'ms');
 
-    const imageBase64 = imageData.predictions?.[0]?.bytesBase64Encoded;
-    const imageMimeType = imageData.predictions?.[0]?.mimeType || 'image/png';
+    // 从 AI Studio 响应中提取图片数据
+    const imageBase64 = imageData.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
+    const imageMimeType = imageData.candidates?.[0]?.content?.parts?.[0]?.inlineData?.mimeType || 'image/png';
 
     if (!imageBase64) {
       console.error('[API] 未接收到图片数据:', imageData);
