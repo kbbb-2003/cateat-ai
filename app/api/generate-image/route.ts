@@ -52,44 +52,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 阶段1: 使用中转站优化提示词
-    console.log('[API] 阶段1: 开始优化提示词...');
+    // 跳过提示词优化，直接使用用户输入
+    console.log('[API] 跳过优化阶段，直接使用用户提示词');
+    const optimizedPrompt = prompt;
     const optimizeStartTime = Date.now();
-
-    const geminiUrl = `${geminiBaseUrl}/models/gemini-2.5-pro:generateContent?key=${geminiApiKey}`;
-    console.log('[API] Gemini API URL:', geminiUrl.replace(geminiApiKey, '***'));
-
-    const optimizeResponse = await fetch(geminiUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        contents: [{
-          parts: [{
-            text: `请将以下描述优化成适合 AI 图片生成的英文提示词，要详细、具体、富有艺术感：\n\n${prompt}\n\n只返回优化后的英文提示词，不要其他内容。`
-          }]
-        }]
-      })
-    });
-
-    console.log('[API] 优化提示词响应状态:', optimizeResponse.status);
-
-    if (!optimizeResponse.ok) {
-      const errorText = await optimizeResponse.text();
-      console.error('[API] 优化提示词失败:', errorText);
-      return NextResponse.json(
-        { error: '优化提示词失败' },
-        { status: optimizeResponse.status }
-      );
-    }
-
-    const optimizeData = await optimizeResponse.json();
-    const optimizeDuration = Date.now() - optimizeStartTime;
-    console.log('[API] 优化提示词完成，耗时:', optimizeDuration, 'ms');
-
-    const optimizedPrompt = optimizeData.candidates?.[0]?.content?.parts?.[0]?.text || prompt;
-    console.log('[API] 优化后的提示词:', optimizedPrompt);
 
     // 阶段2: 使用原生 fetch 调用 Vertex AI
     console.log('[API] 阶段2: 开始生成图片...');
