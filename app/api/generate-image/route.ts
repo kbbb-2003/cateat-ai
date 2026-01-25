@@ -2,12 +2,33 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
 // export const runtime = 'edge';
-export const maxDuration = 60;
+export const maxDuration = 10; // Vercel Hobby 限制
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
+
+// 超时保护函数
+async function fetchWithTimeout(url: string, options: RequestInit, timeout = 8000) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+  try {
+    const response = await fetch(url, {
+      ...options,
+      signal: controller.signal
+    });
+    clearTimeout(timeoutId);
+    return response;
+  } catch (error: any) {
+    clearTimeout(timeoutId);
+    if (error.name === 'AbortError') {
+      throw new Error('请求超时，请稍后重试');
+    }
+    throw error;
+  }
+}
 
 export async function POST(request: NextRequest) {
   console.log('[API] 开始处理图片生成请求');
@@ -57,14 +78,14 @@ export async function POST(request: NextRequest) {
     const optimizedPrompt = prompt;
     const optimizeStartTime = Date.now();
 
-    // 阶段2: 使用 Google AI Studio API 生成图片
+    // 阶段2: 使用 Google AI Studio API 生成图片（带超时保护）
     console.log('[API] 阶段2: 开始生成图片...');
     const imageStartTime = Date.now();
 
     const aiStudioUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-001:generateContent?key=${googleImageApiKey}`;
     console.log('[API] AI Studio URL:', aiStudioUrl.replace(googleImageApiKey, '***'));
 
-    const imageResponse = await fetch(aiStudioUrl, {
+    const imageResponse = await fetchWithTimeout(aiStudioUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -79,7 +100,7 @@ export async function POST(request: NextRequest) {
           responseModalities: ["IMAGE"]
         }
       })
-    });
+    }, 8000); // 8秒超时
 
     console.log('[API] 生图响应状态:', imageResponse.status);
 
