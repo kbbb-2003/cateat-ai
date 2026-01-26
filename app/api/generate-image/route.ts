@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
     console.log('[API] 开始生成图片...');
     const imageStartTime = Date.now();
 
-    const aiStudioUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:predict?key=${googleImageApiKey}`;
+    const aiStudioUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-001:generateContent?key=${googleImageApiKey}`;
     console.log('[API] AI Studio URL:', aiStudioUrl.replace(googleImageApiKey, '***'));
 
     const imageResponse = await fetch(aiStudioUrl, {
@@ -52,13 +52,13 @@ export async function POST(request: NextRequest) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        instances: [
-          { prompt: prompt }
-        ],
-        parameters: {
-          sampleCount: 1,
-          aspectRatio: aspectRatio || "1:1",
-          outputMimeType: format === 'jpg' ? 'image/jpeg' : `image/${format || 'png'}`
+        contents: [{
+          parts: [{
+            text: prompt
+          }]
+        }],
+        generationConfig: {
+          responseModalities: ["IMAGE"]
         }
       })
     });
@@ -78,8 +78,9 @@ export async function POST(request: NextRequest) {
     const imageDuration = Date.now() - imageStartTime;
     console.log('[API] 图片生成完成，耗时:', imageDuration, 'ms');
 
-    const imageBase64 = imageData.predictions?.[0]?.bytesBase64;
-    const imageMimeType = format === 'jpg' ? 'image/jpeg' : `image/${format || 'png'}`;
+    // 从 AI Studio 响应中提取图片数据
+    const imageBase64 = imageData.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
+    const imageMimeType = imageData.candidates?.[0]?.content?.parts?.[0]?.inlineData?.mimeType || 'image/png';
 
     if (!imageBase64) {
       console.error('[API] 未接收到图片数据:', imageData);
