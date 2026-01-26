@@ -39,12 +39,12 @@ export async function POST(request: NextRequest) {
     console.log('[API] 使用用户提示词:', prompt);
     const optimizeStartTime = Date.now();
 
-    // 使用 Google AI Studio API 生成图片
+    // 使用中转站 Gemini 3 Pro Preview 生成图片
     console.log('[API] 开始生成图片...');
     const imageStartTime = Date.now();
 
-    const aiStudioUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-001:generateContent?key=${googleImageApiKey}`;
-    console.log('[API] AI Studio URL:', aiStudioUrl.replace(googleImageApiKey, '***'));
+    const aiStudioUrl = `https://gemini.wxart.space/v1beta/models/gemini-3-pro-preview:generateContent?key=${googleImageApiKey}`;
+    console.log('[API] 中转站 URL:', aiStudioUrl.replace(googleImageApiKey, '***'));
 
     const imageResponse = await fetch(aiStudioUrl, {
       method: 'POST',
@@ -52,13 +52,19 @@ export async function POST(request: NextRequest) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
+        system_instruction: {
+          parts: [{
+            text: "You are an image generation AI. Your ONLY task is to generate images. You MUST NOT output any text, thoughts, or explanations. When given a prompt, immediately generate and return an image. Do not think, do not explain, just generate the image directly."
+          }]
+        },
         contents: [{
           parts: [{
-            text: prompt
+            text: `Generate an image: ${prompt}`
           }]
         }],
         generationConfig: {
-          responseModalities: ["IMAGE"]
+          response_modalities: ["IMAGE"],
+          temperature: 0.4
         }
       })
     });
@@ -78,9 +84,21 @@ export async function POST(request: NextRequest) {
     const imageDuration = Date.now() - imageStartTime;
     console.log('[API] 图片生成完成，耗时:', imageDuration, 'ms');
 
-    // 从 AI Studio 响应中提取图片数据
-    const imageBase64 = imageData.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
-    const imageMimeType = imageData.candidates?.[0]?.content?.parts?.[0]?.inlineData?.mimeType || 'image/png';
+    // 从 generateContent 响应中提取图片数据
+    let imageBase64 = null;
+    let imageMimeType = 'image/png';
+
+    const parts = imageData.candidates?.[0]?.content?.parts;
+    if (parts && Array.isArray(parts)) {
+      for (const part of parts) {
+        if (part.inlineData) {
+          imageBase64 = part.inlineData.data;
+          imageMimeType = part.inlineData.mimeType || 'image/png';
+          console.log('[API] 找到图片数据，类型:', imageMimeType);
+          break;
+        }
+      }
+    }
 
     if (!imageBase64) {
       console.error('[API] 未接收到图片数据:', imageData);
